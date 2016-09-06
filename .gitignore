@@ -1,0 +1,8 @@
+# VIM shenanigans
+*.swp
+
+bazel-CtCI
+bazel-bin
+bazel-genfiles
+bazel-out
+bazel-testlogs
