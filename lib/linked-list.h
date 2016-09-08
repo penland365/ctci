@@ -3,80 +3,131 @@
 
 #include <iostream>
 
-template <class T> class Node {
+template <class E> class Node {
   public:
-    Node(T data);
+    Node(E data);
     ~Node();
     std::shared_ptr<Node> next;
+    E data() { return data_; }
   private:
-    T data;
+    E data_;
 };
-template <class T>
-Node<T>::Node(T data) {
-  this->data = data;
+
+template <class E>
+Node<E>::Node(E data) {
+  this->data_ = data;
   next = nullptr;
 }
 
-template <class T>
-Node<T>::~Node() {
+template <class E>
+Node<E>::~Node() {
   next.reset();
 }
 
-template <class T> class LinkedList {
+template <class E> class LinkedList {
   private:
-    std::shared_ptr<Node<T>> head;
+    std::shared_ptr<Node<E>> head;
+    std::shared_ptr<Node<E>> tail;
+    int recursive_size_(std::shared_ptr<Node<E>> &current_head, int count);
   public:
     LinkedList();
-    LinkedList(T data);
+    LinkedList(E data);
     ~LinkedList();
-    void prepend(T data);
-    void append(T data);
+    void prepend(E data);
+    void append(E data);
     int Size();
+    void Delete(const E data_to_delete);
+    E Head();   // returns the first element of this list
 };
 
-template <class T>
-LinkedList<T>::LinkedList() {
+template <class E>
+LinkedList<E>::LinkedList() {
   head.reset();
+  tail.reset();
 }
 
-template <class T>
-LinkedList<T>::LinkedList(T data) {
-  std::shared_ptr<Node<T>> ptr(new Node<T>(data));
+template <class E>
+LinkedList<E>::LinkedList(E data) {
+  std::shared_ptr<Node<E>> ptr(new Node<E>(data));
   head = ptr;
+  tail = ptr;
 }
 
-template <class T>
-LinkedList<T>::~LinkedList() {
+template <class E>
+LinkedList<E>::~LinkedList() {
   head.reset();
+  tail.reset();
 }
 
-template <class T>
-int LinkedList<T>::Size() {
-  if(head == nullptr) return -1;
-  std::shared_ptr<Node<T>> next_ptr = head;
-  int count = 0;
-  while(next_ptr != nullptr) {
-    next_ptr = next_ptr->next;
-    ++count;
+template <class E>
+inline int LinkedList<E>::recursive_size_(std::shared_ptr<Node<E>> &current_head, int count) {
+  if(current_head->next == nullptr) return count;
+  return recursive_size_(current_head->next, ++count);
+}
+
+template <class E>
+int LinkedList<E>::Size() {
+  if(head == nullptr) return 0;
+  return recursive_size_(head, 1);
+}
+
+template <class E>
+void LinkedList<E>::prepend(E data) {
+  std::shared_ptr<Node<E>> new_head(new Node<E>(data));
+  if(head == nullptr && tail == nullptr) {
+    head = new_head;
+    tail = new_head;
+  } else {
+    new_head->next = head;
+    head = new_head;
   }
-  return count;
 }
 
-template <class T>
-void LinkedList<T>::prepend(T data) {
-  std::shared_ptr<Node<T>> new_head(new Node<T>(data));
-  new_head->next = head;
-  head = new_head;
-}
-
-template <class T>
-void LinkedList<T>::append(T data) {
-  if(head == nullptr) prepend(data);  
-  std::shared_ptr<Node<T>> tail(new Node<T>(data));
-  std::shared_ptr<Node<T>> next_ptr = head;
-  while(next_ptr->next != nullptr) {
-    next_ptr = next_ptr->next;
+template <class E>
+void LinkedList<E>::append(E data) {
+  if(head == nullptr) {
+    prepend(data);
+  } else {
+    std::shared_ptr<Node<E>> tail(new Node<E>(data));
+    std::shared_ptr<Node<E>> next_ptr = head;
+    while(next_ptr->next != nullptr) {
+      next_ptr = next_ptr->next;
+    }
+    next_ptr->next = tail;
   }
-  next_ptr->next = tail;
 }
+
+template <class E>
+E LinkedList<E>::Head() {
+  auto ptr = head;
+  head = head->next;
+  return ptr->data();
+}
+
+template <class E>
+void LinkedList<E>::Delete(const E data_to_delete) {
+  if(head == nullptr) return;
+  auto curr_ptr = head;
+  auto prev_ptr = head;
+  bool found = false;
+
+  while(curr_ptr->next != nullptr && !found) {
+    if(curr_ptr->data() == data_to_delete) {
+      found = true;
+    } else {
+      prev_ptr = curr_ptr;
+      curr_ptr = curr_ptr->next;
+    }
+  }
+  if(found) {
+    if(curr_ptr == head) {
+      head = head->next;
+    } else if(curr_ptr == tail) {
+      tail = prev_ptr;
+    }
+    prev_ptr->next = curr_ptr->next;
+    curr_ptr.reset();
+  }
+}
+
 #endif
