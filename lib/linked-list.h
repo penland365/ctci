@@ -5,19 +5,13 @@
 
 template <class E> class Node {
   public:
-    Node(E data);
+    Node(E data) : data_(data) {next = nullptr;};
     ~Node();
-    std::shared_ptr<Node> next;
+    std::shared_ptr<Node<E>> next;
     E data() { return data_; }
   private:
-    E data_;
+    E data_ {};
 };
-
-template <class E>
-Node<E>::Node(E data) {
-  this->data_ = data;
-  next = nullptr;
-}
 
 template <class E>
 Node<E>::~Node() {
@@ -29,12 +23,16 @@ template <class E> class LinkedList {
     std::shared_ptr<Node<E>> head;
     std::shared_ptr<Node<E>> tail;
     int recursive_size_(std::shared_ptr<Node<E>> &current_head, int count);
+    template<typename Func>
+    E* recursive_find(std::shared_ptr<Node<E>> node, Func func);
   public:
     LinkedList();
     LinkedList(E data);
     ~LinkedList();
-    void prepend(E data);
+    void prepend(const E &data);
     void append(E data);
+    template<typename Func>
+    E* Find(Func func);
     int Size();
     void Delete(const E data_to_delete);
     E Head();   // returns the first element of this list
@@ -72,7 +70,7 @@ int LinkedList<E>::Size() {
 }
 
 template <class E>
-void LinkedList<E>::prepend(E data) {
+void LinkedList<E>::prepend(const E &data) {
   std::shared_ptr<Node<E>> new_head(new Node<E>(data));
   if(head == nullptr && tail == nullptr) {
     head = new_head;
@@ -128,6 +126,22 @@ void LinkedList<E>::Delete(const E data_to_delete) {
     prev_ptr->next = curr_ptr->next;
     curr_ptr.reset();
   }
+}
+
+template <class E>
+template <typename Func>
+E* LinkedList<E>::Find(Func func) {
+  if(head == nullptr) return nullptr;
+  return recursive_find(head, func);
+}
+
+template <class E>
+template <typename Func>
+E* LinkedList<E>::recursive_find(std::shared_ptr<Node<E>> node, Func func) {
+  if(node == nullptr) return nullptr;
+  E* value = new E(node->data());
+  if(func(*value)) return value;
+  return recursive_find(node->next, func);
 }
 
 #endif
