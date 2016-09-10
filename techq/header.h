@@ -3,6 +3,6 @@
 
 #include <string>
 
-std::string get_greet(const std::string &thing);
+void array_pairs();
 
 #endif
