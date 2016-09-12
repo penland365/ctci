@@ -3,6 +3,6 @@
 #include <string>
 
 int main(int argc, char** argv) {
-  array_pairs();
+  duplicate_work();
   return 0;
 }

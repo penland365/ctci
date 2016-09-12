@@ -5,19 +5,13 @@
 
 template <class E> class HashEntry {
   public:
-    HashEntry(int key, E value);
+    HashEntry(int key, E value) : value_(value) {key_ = key;};
     int key() { return key_; };
     E value() { return value_; };
   private:
     int key_;
-    E value_;
+    E value_ {};
 };
-
-template <class E>
-HashEntry<E>::HashEntry(int key, E value) {
-  key_ = key;
-  value_ = value;
-}
 
 template <class E> class HashTable {
   public:
@@ -44,7 +38,7 @@ void HashTable<E>::initialize_array_(int size) {
 template <class E>
 HashTable<E>::HashTable() {
   size_ = 0;
-  array_length_ = 32;
+  array_length_ = 128;
   std::unique_ptr<std::unique_ptr<LinkedList<HashEntry<E>>>[]> array_temp(new std::unique_ptr<LinkedList<HashEntry<E>>>[array_length_]);
   array_ = std::move(array_temp);
   array_temp.reset();
@@ -73,6 +67,7 @@ void HashTable<E>::put(int key, E value) {
 template <class E>
 E* HashTable<E>::get(const int key) {
   int idx = key % array_length_;
+  std::cout << "idx is " << idx << std::endl;
   auto list = std::move(array_[idx]);
   auto* hash_entry = list->Find(
     [&key] (HashEntry<E>& entry) -> bool { return entry.key() == key; }
