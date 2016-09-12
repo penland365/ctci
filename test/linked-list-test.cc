@@ -24,6 +24,25 @@ TEST(LinkedListTest, Delete) {
   list->append(3);
   list->Delete(1);
   auto head = list->Head();
-  auto second_head = list->Head();
-  ASSERT_EQ(second_head, 3) << "Delete Element did not work";
+  ASSERT_EQ(head, 2) << "Delete Element did not work";
+}
+
+TEST(LinkedListTest, Find) {
+  std::unique_ptr<LinkedList<std::string>> list(new LinkedList<std::string>("foo"));
+  list->append("bar");
+  std::string* result = list->Find(
+    [] (const std::string& word) { return word.compare("bar") == 0; }
+  );
+  ASSERT_TRUE(result != nullptr);
+  EXPECT_EQ(*result, "bar");
+}
+
+TEST(LinkedListTest, FindNull) {
+  std::unique_ptr<LinkedList<std::string>> list(new LinkedList<std::string>("foo"));
+  list->append("bar");
+  std::string word_to_find = "baz";
+  auto *result = list->Find(
+    [&word_to_find] (std::string& word) { return word.compare(word_to_find) == 0; }
+  );
+  ASSERT_EQ(result, nullptr);
 }
